@@ -20,7 +20,7 @@ The magnitude of the signal over time is a $n$ sized vector containing
 
 $M_n = \sqrt{Re(z_n)^2 + Im(z_n)^2} = \sqrt{a_n^2 + b_n^2}$, 
 
-where $M_n$ is the magnitude of the $n^{\mathrm{th}}$ data point. The frequency as a linearly spaced vector from $0$ to $\frac{1}{2 T}$, 
+where $M_n$ is the magnitude of the $n^{\mathrm{th}}$ data point. The frequency is a linearly spaced vector from $0$ to $\frac{1}{2 T}$, 
 
 $f = \mathrm{linspace}(0, \frac{1}{2 T}, \mathrm{numpoints})$,
 
