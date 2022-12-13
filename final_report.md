@@ -56,28 +56,28 @@ We performed two major trials and visualized our results using a Jupyter noteboo
 ## Simple trial
 After performing a FFT on a sample of two superimposed sine waves at $311.127\ \mathrm{Hz}$ and $???\ \mathrm{Hz}$, we produced the following graph ![sample 2 spectrum](./images/samp2_spectrum.png)
 
-We then isolated the signals as visualized below:
+We isolated the signals as visualized below:
 
 ![sample 2 low](./images/samp2_low.png)
 
 ![sample 2 high](./images/samp2_high.png)
 
-These particular data points were then recast as `cufftReal` (IS THIS RIGHT??) data and passed through an inverse fourier transform to generate seperate resultant audio files. 
+These collections of data points were then recast as `cufftReal` **(IS THIS RIGHT??)** data and passed through an inverse fourier transform to generate seperate resultant audio files. 
 
 As these two signals have very little overlap in the frequency domain, the parsing was clean and the resulting audio files contatined exactly one of each of the sine waves. 
 
 ## Something more complicated
-We then performed an FFT on a sample of many superimposed signals, and produced the following graph 
+We also performed an FFT on a sample of many superimposed signals, and produced the following graph of its frequency spectrum
 
 ![jingle spectrum](./images/jingle_spectrum.png)
 
-We then isolated the signals as visualized below:
+We isolated the signals as visualized below:
 
 ![sample 2 low](./images/jingle_low.png)
 
 ![sample 2 high](./images/jingle_high.png)
 
-Again, these data points were recast as `cufftReal` (IS THIS RIGHT??) data and passed through an inverse fourier transform to generate seperate resultant audio files. 
+Again, these data points were recast as `cufftReal` **(IS THIS RIGHT??)** data and passed through an inverse fourier transform to generate seperate resultant audio files. 
 
 The output files consisted of a first file containing an audio of the loudest frequency in the original (plus some surrounding frequencies), and a second file containing all the other frequencies in the original.
 
