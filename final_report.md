@@ -13,6 +13,20 @@ We incorperated an [external library for processing audio files](https://github.
 ## CuFFT library 
 We also used [cuFFT](https://docs.nvidia.com/cuda/cufft/index.html), the CUDA Fast Fourier Transform library. This allowed us to take $n$ audio data points and pass them through a real-to-complex transform to generate $n+1$ complex numbers $z_n = a_n+b_ni$ where $a_n$ are the the $\cos(x)$ contributions in the signal and $b_n$ are the the $\sin(x)$ contributions in the signal.
 
+## Theory 
+Sound waves have a magnitude (how loud it is), and a frequency (the pitch). Integrating AudioFile.h and cuFFT, we were able to transform an audio signal into a dataset of complex Fourier coefficients. 
+
+The magnitude of the signal over time is a $n$ sized vector containing 
+
+$M_n = \sqrt{Re(z_n)^2 + Im(z_n)^2} = \sqrt{a_n^2 + b_n^2}$, 
+
+where $M_n$ is the magnitude of the $n^{\mathrm{th}}$ data point. The frequency as a linearly spaced vector from $0$ to $\frac{1}{2 T}$, 
+
+$f = \mathrm{linspace}(0, \frac{1}{2 T}, \mathrm{numpoints})$,
+
+where $\mathrm{numpoints}$ is the number of data points in our sample and period $T$ is the inverse of our sampling rate. 
+
+
 ## Key variables 
 **NEEDS FILLING OUT !!**
 | Variable name | Type | Use|
@@ -35,15 +49,6 @@ E --> F[Process and visualize data in Google Colab]
 ```
 *(to generate the graph, please install the "Markdown Preview Mermaid Support" extension in VS code)*
 
-We calculated the magnitude as a $n$ sized vector containing 
-
-$M_n = \sqrt{Re(z_n)^2 + Im(z_n)^2} = \sqrt{a_n^2 + b_n^2}$, 
-
-and the frequency as a linearly spaced vector from $0$ to $\frac{1}{2 T}$, 
-
-$f = \mathrm{linspace}(0, \frac{1}{2 T}, \mathrm{numpoints})$,
-
-where $\mathrm{numpoints}$ is the number of data points in our sample and period $T$ is the inverse of our sampling rate. 
 
 # Results 
 We performed two major trials and visualized our results using a Jupyter notebook in Google colaboratory.
