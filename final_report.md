@@ -50,11 +50,15 @@ where $\mathrm{numpoints}$ is the number of data points in our sample and period
 **NEEDS FILLING OUT !!**
 ```mermaid 
 graph TD;
-A[C++ Source file] --> B[Generate empty data vector]
-B --> C[Call CUDA Kernel]
-C --> D[Do the things in the Kernel]
-D --> E[Calculate magnitude and frequency data]
+A[Read in .wav audio file] --> B[Generate inputs and outpus, then allocate their memory for the GPU]
+B --> C[Call Real to Complex CUDA FFT]
+C --> D[Receive Complex data]
+D --> E[Calculate magnitude and frequency data based on these results]
 E --> F[Process and visualize data in Google Colab]
+E --> G[Slice data based on highest magnitude frequency, creating a sliced list and one without the slice]
+G --> H[Generate new inputs and outputs, and allocate their memory for GPU]
+H --> I[Call Complex to Real CUDA FFT for both sets of complex points]
+I --> J[Write out both lists to new resulting Audio files]
 ```
 *(to generate the graph, please install the "Markdown Preview Mermaid Support" extension in VS code)*
 
@@ -71,7 +75,7 @@ We isolated the signals as visualized below:
 
 ![sample 2 high](./images/samp2_high.png)
 
-These collections of data points were then recast as `cufftReal` **(IS THIS RIGHT??)** data and passed through an inverse fourier transform to generate seperate resultant audio files. 
+These collections of data points were then converted back to *real* data points via inverse fourier transform to generate seperate resultant audio files. 
 
 As these two signals have very little overlap in the frequency domain, the parsing was clean and the resulting audio files contatined exactly one of each of the sine waves. 
 
@@ -86,7 +90,7 @@ We isolated the signals as visualized below:
 
 ![sample 2 high](./images/jingle_high.png)
 
-Again, these data points were recast as `cufftReal` **(IS THIS RIGHT??)** data and passed through an inverse fourier transform to generate seperate resultant audio files. 
+Again, these data points were run through an inverse fourier transform to convert the complex points to real points and create seperate audio files from there. 
 
 The output files consisted of a first file containing an audio of the loudest frequency in the original (plus some surrounding frequencies), and a second file containing all the other frequencies in the original.
 
