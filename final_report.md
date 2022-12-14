@@ -64,7 +64,7 @@ I --> J[Write out both lists to new resulting Audio files]
 We performed two major trials and visualized our results using a Jupyter notebook in Google colaboratory.
 
 ## Simple trial
-After performing a FFT on a sample of two superimposed sine waves at $311.127\ \mathrm{Hz}$ and $???\ \mathrm{Hz}$, we produced the following graph ![sample 2 spectrum](./images/samp2_spectrum.png)
+After performing a FFT on a sample of two superimposed sine waves at $311.127\ \mathrm{Hz}$ and $880\ \mathrm{Hz}$, we produced the following graph ![sample 2 spectrum](./images/samp2_spectrum.png)
 
 We isolated the signals as visualized below:
 
