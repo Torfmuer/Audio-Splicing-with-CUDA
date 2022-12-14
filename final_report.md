@@ -35,7 +35,6 @@ where $\mathrm{numpoints}$ is the number of data points in our sample and period
 
 
 ## Key variables 
-**NEEDS FILLING OUT !!**
 | Variable name | Type | Use|
 |---------------|------|----|
 | a | AudioFile<`float`> | vector of vectors used to represent the audio file |
@@ -46,8 +45,6 @@ where $\mathrm{numpoints}$ is the number of data points in our sample and period
 
 
 ## Program flow
-
-**NEEDS FILLING OUT !!**
 ```mermaid 
 graph TD;
 A[Read in .wav audio file] --> B[Generate inputs and outpus, then allocate their memory for the GPU]
