@@ -2,7 +2,14 @@
 Lydia Calderon-Aceituno | Michael Laramie | Owen Foster
 
 # Purpose and goals 
-A short description of the purpose and goals of the program.
+The main goal of this project is to be able to separate and isolate specific sections of an audio file (such as voices or notes), and write those to separate files. In order to do this, a fourier transform must be implemented on the GPU.
+Goals:
+- make `.wav` files readable as data
+- implement Real to Complex transformation
+- manipulate magnitude values to isolate specific frequencies
+- isolate specific voices within an audio clip
+- implement Complex to Real transformation
+- write data out as an audio file
 
 # Assumptions made
 It is assumed that users know how to set up and run a CUDA project, and how to correctly load audio files into the project in order to perform the parsing. 
@@ -31,9 +38,11 @@ where $\mathrm{numpoints}$ is the number of data points in our sample and period
 **NEEDS FILLING OUT !!**
 | Variable name | Type | Use|
 |---------------|------|----|
-| name ?? | maybe an `int`?| Sampling rate of the audio file |
-| name| `int` | Size of audio file data |
-| name | `type` | did important things too |
+| a | AudioFile<`float`> | vector of vectors used to represent the audio file |
+| size | `int` | size of audio file data, crucial to Fourier transform |
+| test | vector<`float`> | stores magnitude of complex data points, determines range of slice |
+| hostInputData | cufftReal* | the real data submitted to R2C FFT |
+| hostOutputData | cufftComplex* | the complex data returned from R2C FFT |
 
 
 ## Program flow
