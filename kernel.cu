@@ -1,3 +1,16 @@
+//---------------------------------------------------------------
+// AUDIO SLICING FINAL PROJECT
+// CS 315 Distributed Scalable Computing
+// Dr. Qian Mao 
+// Whitworth University
+// DEVELOPED BY:
+// LYDIA CALDERON-ACEITUNO, MICHAEL LARAMIE, OWEN FOSTER
+//---------------------------------------------------------------
+// USING LIBRARY DEVELOPED BY ADAM STARK
+// https://github.com/adamstark/AudioFile
+// https://www.adamstark.co.uk
+//---------------------------------------------------------------
+
 #include <iostream>
 #include <stdlib.h>
 #include <stdio.h>
@@ -26,7 +39,7 @@ AudioFile<float> loadAudio(vector<float>& v) {
     AudioFile<float> a;
     bool loadedOK = a.load(inputFilePath);
 
-    printf("%d %d\n", a.getNumChannels(), a.getNumSamplesPerChannel());
+    printf("%d %d\n", a.getNumChannels(), a.getNumSamplesPerChannel()); // print stats for testing
 
     //---------------------------------------------------------------
     // Convert data from Multi-Dimensional Array -> One-Dimensional Array
@@ -36,7 +49,11 @@ AudioFile<float> loadAudio(vector<float>& v) {
     return a;
 }
 
+// Function to slice the complex data into two lists
+// Takes in the index of the highest magnitude frequency
+// Slices 100 indices below and above
 void findBins(int index, cufftComplex* hod, cufftComplex* crazy, int size) {
+    // Grab all complex data points other than the slice
     for (int i = 0; i < size / 2 + 1; i++) {
         if (i > index - 100 && i < index + 100) {
             crazy[i].x = hod[i].x;
@@ -47,14 +64,18 @@ void findBins(int index, cufftComplex* hod, cufftComplex* crazy, int size) {
             crazy[i].y = 0.0f;
         }
     }
+    // Grab the slice
     for (int i = index - 100; i < index + 100; i++) {
         hod[i].x = 0.0f;
         hod[i].y = 0.0f;
     }
-    cout << "INDEX: " << index << endl;
+    cout << "INDEX: " << index << endl; // print index for testing
 }
 
+//---------------------------------------------------------------
+// Main
 int main() {
+    // Print basic info for testing in the console
     std::cout << "**********************" << std::endl;
     std::cout << "cuFFT audio transform" << std::endl;
     std::cout << "**********************" << std::endl << std::endl;
@@ -66,11 +87,14 @@ int main() {
     AudioFile<float> a = loadAudio(audio);
     int size = audio.size();
 
+    // Put all data points from audio file into a cufftReal* object 
+    // to use in FFT
     cufftReal* hostInputData = (cufftReal*)malloc(size * sizeof(cufftReal));
     for (int i = 0; i < size; i++) {
         hostInputData[i] = (cufftReal)audio[i];
     }
 
+    // Print out sample data to test
     cout << "REAL DATA BT: " << endl;
     for (int i = 0; i < 30; i++) {
         printf("%i %f\n", i, hostInputData[i]);
@@ -100,30 +124,30 @@ int main() {
     //---------------------------------------------------------------
     // Step 5: Transfer results from Device -> Host
     cudaMemcpy(hostOutputData, deviceOutputData, (size / 2 + 1) * sizeof(cufftComplex), cudaMemcpyDeviceToHost);
-
-    //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    // NEXT PART: C2R 1
-
+    
+    //---------------------------------------------------------------
+    // Create vector of magnitudes of each complex data point
+    // vector has length of (size / 2) + 1
     vector<float> vecto;
-    // Data Manip
     for (int i = 0; i < size / 2 + 1; i++) {
         //printf("%f %f\n", hostOutputData[i].x, hostOutputData[i].y);
         float mag = sqrt((hostOutputData[i].x * hostOutputData[i].x) + (hostOutputData[i].y * hostOutputData[i].y));
         vecto.push_back(mag);
     }
 
-    // Parse data into segments based on estimated minimum magnitude for a point of interest
-
+    // Clone complex data in order to have two copies to slice in
     cufftComplex* crazee = (cufftComplex*)malloc((size / 2 + 1) * sizeof(cufftComplex));
     for (int i = 0; i < size / 2 + 1; i++) {
         crazee[i].x = hostOutputData[i].x;
         crazee[i].y = hostOutputData[i].y;
     }
 
+    // Find the index with the highest magnitude
+    // this is equivalent to the loudest frequency
     float highest = *max_element(vecto.begin(), vecto.end());
-    //float lowest = *min_element(vecto.begin(), vecto.end());
 
-    // If you want to generate a CSV file 
+    // If you want to generate a CSV file
+    // CSV file needed for graphing function 
     std::ofstream ffout("jingle_out.csv");
     ffout << "\"Re\"" << "," << "\"Im\"" << std::endl;
     for (int i = 0; i < (size / 2 + 1); i++)
@@ -132,6 +156,9 @@ int main() {
     }
     ffout.close();
 
+    //---------------------------------------------------------------
+    // Iterate through vector of magnitudes to find the index of the highest magnitude
+    // once highest magnitude index is found, call findBins(...) to slice the data around the highest index
     for (int i = 0; i < size / 2 + 1; i++) {
         if (vecto[i] == highest) {
             findBins(i, hostOutputData, crazee, size);
@@ -139,6 +166,10 @@ int main() {
     }
 
     //---------------------------------------------------------------
+    // Begin complex to real inverse fourier transform to convert the now sliced complex data into 
+    // real data to write to audio file
+    //---------------------------------------------------------------
+    // Surrounding data conversion back to real data
     // Step 1: Gather Input Data
     cufftComplex* hostInputData2 = (cufftComplex*)malloc((size / 2 + 1) * sizeof(cufftComplex));
     for (int i = 0; i < size / 2 + 1; i++) {
@@ -169,17 +200,14 @@ int main() {
     // Step 5: Transfer results from Device -> Host
     cudaMemcpy(hostOutputData2, deviceOutputData2, size * sizeof(cufftReal), cudaMemcpyDeviceToHost);
 
-    //--------------------------------------------------------------------------------------------------------------------------------
-    // NEXT PART: C2R 2
-
+    //---------------------------------------------------------------
+    // Sliced data conversion back to real data
     // Step 1: Gather input Data
-
     cufftComplex* hostInputData3 = (cufftComplex*)malloc((size / 2 + 1) * sizeof(cufftComplex));
     for (int i = 0; i < size / 2 + 1; i++) {
         hostInputData3[i].x = crazee[i].x;
         hostInputData3[i].y = crazee[i].y;
     }
-
 
     // Step 2: Device memory Allocation
     cufftComplex* deviceInputData3;
@@ -204,27 +232,15 @@ int main() {
     // Step 5: Transfer results from Device -> Host
     cudaMemcpy(hostOutputData3, deviceOutputData3, size * sizeof(cufftReal), cudaMemcpyDeviceToHost);
 
-
-
-
-
-
-
-
-
+    //---------------------------------------------------------------
     // Cleanup
     cufftDestroy(handle);
     cufftDestroy(handle2);
     cufftDestroy(handle3);
+    //---------------------------------------------------------------
 
-
-
-    /*cout << "REAL DATA AT: " << endl;
-    for (int j = 0; j < parses[i].size(); j++) {
-        printf("%i %f\n", j, parses[i][j]);
-    }*/
-
-
+    // Write both selections of data to unique audio files
+    // Surrounding data
     AudioFile<float> output;
     string outputFilePath = "result_audio2.wav"; // change this to somewhere useful for you
     cout << outputFilePath << endl;
@@ -236,17 +252,15 @@ int main() {
     output.save(outputFilePath, AudioFileFormat::Wave);
         cout << audio.size() << endl;
 
-        AudioFile<float> output2;
-        string outputFilePath2 = "result_audio3.wav"; // change this to somewhere useful for you
-        cout << outputFilePath2 << endl;
+    // Sliced data
+    AudioFile<float> output2;
+    string outputFilePath2 = "result_audio3.wav"; // change this to somewhere useful for you
+    cout << outputFilePath2 << endl;
 
-        for (int j = 0; j < size; j++) {
-            output2.samples[0].push_back(hostOutputData3[j] / size);
-            output2.samples[0].push_back(0);
-        }
-        output2.save(outputFilePath2, AudioFileFormat::Wave);
-        cout << audio.size() << endl;
-    
-
-
+    for (int j = 0; j < size; j++) {
+        output2.samples[0].push_back(hostOutputData3[j] / size);
+        output2.samples[0].push_back(0);
+    }
+    output2.save(outputFilePath2, AudioFileFormat::Wave);
+    cout << audio.size() << endl;
 }
